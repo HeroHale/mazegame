@@ -45,13 +45,7 @@ class GameWindow(arcade.Window):
             if success:
                 print("Loaded level from file.")
             else:
-                print("Error loading level")
-    
-    
-
-    
-
-            
+                print("Error loading level")        
             
             
 my_window = GameWindow()
