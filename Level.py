@@ -11,17 +11,22 @@ class LevelEncoder(json.JSONEncoder):
             return object.encode()
         return json.JSONEncoder.default(self, object)
 
-    def level_decoder(dct):
-        # base case no recursion
-        if dct == "tile":
-            return Tile(0, 0)
-        if isinstance(dct, list):
-            soup = []
-            for item in dct:
-                soup.append(level_decoder(item))
-            return soup
-        return dct
-
+def level_decoder(dct):
+    #base case
+    if dct == "tile":
+        return Tile(0, 0)
+    elif isinstance(dct, list):
+        #recursive case
+        #collect any items in list that might be the base case 
+        empty_list = []
+        for item in dct:
+            decoded_item = level_decoder(item)
+            empty_list.append(decoded_item)
+            #empty list now contains the decoded version of everything in dct
+        return empty_list
+    else:
+        #this will only happen if dct is None
+        return None
 class Level():
     def __init__(self):
         self.contents = []
@@ -60,14 +65,13 @@ class Level():
                     continue
                 elif isinstance(tile, str):
                     raise Exception("that is not a tile")
+                elif isinstance(tile, Tile):
+                    pass
                 else:
                     raise Exception("what? how?")
 
-                    
-
-            tile.center_x = row_index * TILESIZE
-            tile.center_y = col_index * TILESIZE
-            self.tiles.append(tile) # add the new tile to the arcade list
+                tile.set_cords(row_index, col_index)
+                self.tiles.append(tile) # add the new tile to the arcade list
 
     def place_tile(self, coord_x, coord_y):
         try:
