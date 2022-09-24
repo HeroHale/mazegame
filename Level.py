@@ -47,9 +47,13 @@ class Level():
         #except:
             #return False
 
-    def load(self):
+    def load(self, levelname: str):
         #try:
-        with open("level.json", "r") as f:
+        if levelname == None:
+            levelname = "level.json"
+        else:
+            levelname = f"Levels/{levelname}.json"
+        with open(levelname, "r") as f:
             self.contents = level_decoder(json.load(f))
             
             self.sync_tiles() # fix tiles that get instantiated at 0,0

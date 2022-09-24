@@ -3,9 +3,11 @@ PLAYER_WIDTH = 15
 PLAYER_HEIGHT = 15
 PLAYER_MOVE_FORCE = 100
 
-class Player():
+class Player(arcade.Sprite):
     def __init__(self, starting_x, starting_y, *args, **kwargs):
-        super().__init__(starting_x, starting_y, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.center_x = starting_x
+        self.center_y = starting_y
 
         self.width = PLAYER_WIDTH
         self.height = PLAYER_HEIGHT
