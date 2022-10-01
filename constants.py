@@ -1,6 +1,8 @@
-WIDTH = 800
-HEIGHT = 800
-TILESIZE = 5
-PLAYER_VELOCITY = 15
+import arcade
+
+WIDTH = 1900
+HEIGHT = 900
+TILESIZE = 100
+PLAYER_VELOCITY = 5.5
 Key_Pressed = True
 Key_Released = False

@@ -5,7 +5,7 @@ import json
 from Tile import Tile
 from Level import Level
 from player import Player
-from constants import WIDTH, HEIGHT, TILESIZE, PLAYER_VELOCITY, Key_Pressed, Key_Released
+from constants import WIDTH, HEIGHT, TILESIZE, PLAYER_VELOCITY, Key_Pressed, Key_Released, RED
 
 class GameWindow(arcade.Window):
     def __init__(self):
@@ -17,8 +17,8 @@ class GameWindow(arcade.Window):
         self.A_KEY = Key_Released
         self.D_KEY = Key_Released
         
-        self.level = Level()
-        self.player = Player(0, 0)
+        self.level = Level()# w,   h
+        self.player = Player(242, 135)
         self.mouse_pressed = False
         self.levels = [
             "startinglevel",
@@ -27,6 +27,7 @@ class GameWindow(arcade.Window):
         
 
     def on_draw(self):
+        arcade.draw_rectangle_filled(242, 135, 100, 100, arcade.csscolor.YELLOW)
         self.clear()
         self.player.draw()
         self.level.draw()
@@ -36,9 +37,9 @@ class GameWindow(arcade.Window):
         if self.S_KEY == Key_Pressed:
             self.player.center_y -= PLAYER_VELOCITY
         if self.A_KEY == Key_Pressed:
-            self.player.center_x += PLAYER_VELOCITY
-        if self.D_KEY == Key_Pressed:
             self.player.center_x -= PLAYER_VELOCITY
+        if self.D_KEY == Key_Pressed:
+            self.player.center_x += PLAYER_VELOCITY
 
     def on_mouse_release(self, mouse_x, mouse_y, button, modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT:
@@ -56,17 +57,18 @@ class GameWindow(arcade.Window):
             coord_y = int(mouse_y/TILESIZE)
             self.level.place_tile(coord_x, coord_y)
     def on_key_release(self, key: int, modifiers: int):
-        if key == arcade.key.W:
-            self.KEY_W = Key_Released
-        elif key == arcade.key.S:
-            self.KEY_S = Key_Released
-            # move down
-        elif key == arcade.key.A:
-            self.KEY_A = Key_Released
-        elif key == arcade.key.D:
-            self.KEY_D = Key_Released
+         if key == arcade.key.W:
+             self.W_KEY = Key_Released
+         elif key == arcade.key.S:
+             self.S_KEY = Key_Released
+             # move down
+         elif key == arcade.key.A:
+             self.A_KEY = Key_Released
+         elif key == arcade.key.D:
+             self.D_KEY = Key_Released
+            
 
-
+       
     def on_key_press(self, key, modifiers):
         
         if key == arcade.key.O:
@@ -83,14 +85,14 @@ class GameWindow(arcade.Window):
                 print("Error loading level")            
 
         elif key == arcade.key.W:
-            self.KEY_W = Key_Pressed
+            self.W_KEY = Key_Pressed
         elif key == arcade.key.S:
-            self.KEY_S = Key_Pressed
+            self.S_KEY = Key_Pressed
             # move down
         elif key == arcade.key.A:
-            self.KEY_A = Key_Pressed
+            self.A_KEY = Key_Pressed
         elif key == arcade.key.D:
-            self.KEY_D = Key_Pressed
+            self.D_KEY = Key_Pressed
 
 
         # elif key == arcade.key.UP:

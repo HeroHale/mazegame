@@ -1,6 +1,6 @@
 import arcade
-PLAYER_WIDTH = 15
-PLAYER_HEIGHT = 15
+PLAYER_WIDTH = 50
+PLAYER_HEIGHT = 50
 PLAYER_MOVE_FORCE = 100
 
 class Player(arcade.Sprite):
@@ -37,6 +37,6 @@ class Player(arcade.Sprite):
         arcade.draw_rectangle_filled(
                             self.center_x,
                             self.center_y,
-                            self.width, self.height, arcade.color.PURPLE
+                            self.width, self.height, arcade.color.RED_DEVIL
                             )
                                     #black box in the middle
