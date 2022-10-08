@@ -25,7 +25,8 @@ class GameWindow(arcade.Window):
         self.mouse_pressed = False
         self.levels = [
             "startinglevel",
-            "secondlevel"
+            "secondlevel",
+            "thirdlevel"
         ]
         self.level.load(self.levels[0])
         
@@ -35,7 +36,7 @@ class GameWindow(arcade.Window):
         self.clear()
         self.player.draw()
         self.level.draw()
-    def on_update(self, delta_time, next_level):
+    def on_update(self, delta_time):
         if self.W_KEY == Key_Pressed:
             self.player.center_y += PLAYER_VELOCITY
         if self.S_KEY == Key_Pressed:
@@ -89,6 +90,10 @@ class GameWindow(arcade.Window):
 
             if success:
                 print("Saved level to file.")
+
+        elif key == arcade.key.C:
+            self.level.clear()
+            print("Cleared file.")
         elif key == arcade.key.L:
             success = self.level.load()
 

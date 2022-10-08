@@ -15,6 +15,8 @@ def level_decoder(dct):
     #base case
     if dct == "tile":
         return Tile(0, 0)
+    if dct == "end_tile":
+        return End_Tile(0, 0)
     elif isinstance(dct, list):
         #recursive case
         #collect any items in list that might be the base case 
@@ -29,17 +31,7 @@ def level_decoder(dct):
         return None
 class Level():
     def __init__(self):
-        self.contents = []
-        self.tiles = arcade.SpriteList()
-        #create empty colums
-        for i in range(int(WIDTH/TILESIZE)):
-            col = []
-            for j in range(int(HEIGHT/TILESIZE)):
-                # fill with empty tiles
-                col.append(None)
-            self.contents.append(col)
-
-        self.end_tiles = arcade.SpriteList()
+        self.clear()
 
     def save(self):
         #try:
@@ -63,21 +55,36 @@ class Level():
         #except:
             #return False
 
+    def clear(self):
+        self.contents = []
+        
+        for i in range(int(WIDTH/TILESIZE)):
+            col = []
+            for j in range(int(HEIGHT/TILESIZE)):
+                # fill with empty tiles
+                col.append(None)
+            self.contents.append(col)
+        self.sync_tiles()
+
     def sync_tiles(self):
         self.tiles = arcade.SpriteList()
+        self.end_tiles = arcade.SpriteList()
         for row_index, row in enumerate(self.contents):
             for col_index, tile in enumerate(row):
                 if tile is None:
                     continue
                 elif isinstance(tile, str):
                     raise Exception("that is not a tile")
+                elif isinstance(tile, End_Tile):
+                    self.end_tiles.append(tile)
+                    print("end tile is being placed") # add the new tile to the arcade list
                 elif isinstance(tile, Tile):
-                    pass
+                    self.tiles.append(tile) # add the new tile to the arcade list
                 else:
                     raise Exception("what? how?")
 
                 tile.set_cords(row_index, col_index)
-                self.tiles.append(tile) # add the new tile to the arcade list
+                
 
     def place_tile(self, coord_x, coord_y, tile_class=Tile):
         try:
