@@ -1,17 +1,20 @@
 import sys
 from sqlite3 import Row
+from typing import Counter
 import arcade
 import json
-from Tile import Tile
+from Tile import End_Tile, Tile
 from Level import Level
 from player import Player
-from constants import WIDTH, HEIGHT, TILESIZE, PLAYER_VELOCITY, Key_Pressed, Key_Released, RED
+from constants import WIDTH, HEIGHT, TILESIZE, PLAYER_VELOCITY, Key_Pressed, Key_Released
 
 class GameWindow(arcade.Window):
     def __init__(self):
         super().__init__(WIDTH, HEIGHT, "Maze Game")
         #create empty level
 
+
+        self.level_counter = 0
         self.W_KEY = Key_Released
         self.S_KEY = Key_Released
         self.A_KEY = Key_Released
@@ -22,8 +25,9 @@ class GameWindow(arcade.Window):
         self.mouse_pressed = False
         self.levels = [
             "startinglevel",
-            "mazelevel"
+            "secondlevel"
         ]
+        self.level.load(self.levels[0])
         
 
     def on_draw(self):
@@ -31,7 +35,7 @@ class GameWindow(arcade.Window):
         self.clear()
         self.player.draw()
         self.level.draw()
-    def on_update(self, delta_time):
+    def on_update(self, delta_time, next_level):
         if self.W_KEY == Key_Pressed:
             self.player.center_y += PLAYER_VELOCITY
         if self.S_KEY == Key_Pressed:
@@ -40,6 +44,11 @@ class GameWindow(arcade.Window):
             self.player.center_x -= PLAYER_VELOCITY
         if self.D_KEY == Key_Pressed:
             self.player.center_x += PLAYER_VELOCITY
+        if arcade.check_for_collision_with_list(self.player, self.level.end_tiles):
+            self.level_counter += 1
+            self.level.load(self.levels[self.level_counter])
+
+#colliding = arcade.check_for_collision(self.player, self.tile)
 
     def on_mouse_release(self, mouse_x, mouse_y, button, modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT:
@@ -51,6 +60,10 @@ class GameWindow(arcade.Window):
             coord_x = int(mouse_x/TILESIZE)
             coord_y = int(mouse_y/TILESIZE)
             self.level.place_tile(coord_x, coord_y)
+        if button == arcade.MOUSE_BUTTON_RIGHT:
+            coord_x = int(mouse_x/TILESIZE)
+            coord_y = int(mouse_y/TILESIZE)
+            self.level.place_tile(coord_x, coord_y, End_Tile)
     def on_mouse_motion(self, mouse_x, mouse_y, dx, dy):
         if self.mouse_pressed:
             coord_x = int(mouse_x/TILESIZE)
@@ -130,8 +143,8 @@ class GameWindow(arcade.Window):
     
                         
 args = sys.argv
-[ "python", "./start.py", "startinglevel"]
-[ "python", "./start.py"]
+# [ "python", "./start.py", "startinglevel"]
+# [ "python", "./start.py"]
 
 def process_inputs(window):
     if len(sys.argv) == 1:

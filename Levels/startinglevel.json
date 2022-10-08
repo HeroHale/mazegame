@@ -166,7 +166,7 @@
     ],
     [
         "tile",
-        null,
+        "end_tile",
         null,
         null,
         null,
@@ -177,7 +177,7 @@
     ],
     [
         "tile",
-        null,
+        "end_tile",
         null,
         null,
         null,

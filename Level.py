@@ -1,6 +1,6 @@
 import json
 import arcade
-from Tile import Tile
+from Tile import Tile, End_Tile
 from constants import TILESIZE, HEIGHT, WIDTH
 
 
@@ -38,6 +38,8 @@ class Level():
                 # fill with empty tiles
                 col.append(None)
             self.contents.append(col)
+
+        self.end_tiles = arcade.SpriteList()
 
     def save(self):
         #try:
@@ -77,15 +79,18 @@ class Level():
                 tile.set_cords(row_index, col_index)
                 self.tiles.append(tile) # add the new tile to the arcade list
 
-    def place_tile(self, coord_x, coord_y):
+    def place_tile(self, coord_x, coord_y, tile_class=Tile):
         try:
             if self.contents[coord_x][coord_y] is not None:
                 return
 
-            new_tile = Tile(coord_x, coord_y)
+            new_tile = tile_class(coord_x, coord_y)
             self.contents[coord_x][coord_y] = new_tile
-
             self.tiles.append(new_tile)
+
+            if tile_class == End_Tile:
+                self.end_tiles.append(new_tile)
+
         except IndexError:
             return
 

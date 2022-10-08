@@ -2,7 +2,7 @@ import arcade
 from constants import TILESIZE
 
 class Tile(arcade.Sprite):
-    def __init__(self, x, y, texture="square.png"):
+    def __init__(self, x, y, texture="Textures/square.png"):
         super().__init__(texture, scale=(TILESIZE/16))
         self.set_cords(x, y)
 
@@ -14,5 +14,7 @@ class Tile(arcade.Sprite):
         self.center_y = (y * TILESIZE) + (TILESIZE/2)
 class End_Tile(Tile):
     def __init__(self, x, y):
-        super().__init__(x, y, texture="something")
-    pass
+        super().__init__(x, y, texture="Textures/end_square.png")
+
+    def encode(self):
+        return ("end_tile")
