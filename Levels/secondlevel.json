@@ -16,8 +16,8 @@
         null,
         "tile",
         null,
-        null,
-        null,
+        "end_tile",
+        "end_tile",
         null,
         "tile"
     ],

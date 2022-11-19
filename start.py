@@ -2,52 +2,118 @@ import sys
 from sqlite3 import Row
 from typing import Counter
 import arcade
+import time
+from arcade import PymunkPhysicsEngine
 import json
+
+from pymunk import CollisionHandler
 from Tile import End_Tile, Tile
 from Level import Level
 from player import Player
-from constants import WIDTH, HEIGHT, TILESIZE, PLAYER_VELOCITY, Key_Pressed, Key_Released
+from turret import Turret
+from constants import WIDTH, HEIGHT, TILESIZE, PLAYER_FORCE, Key_Pressed, Key_Released
 
 class GameWindow(arcade.Window):
     def __init__(self):
         super().__init__(WIDTH, HEIGHT, "Maze Game")
         #create empty level
 
-
-        self.level_counter = 0
+        self.turret = Turret()
+        self.current_level = 0
         self.W_KEY = Key_Released
         self.S_KEY = Key_Released
         self.A_KEY = Key_Released
         self.D_KEY = Key_Released
-        
-        self.level = Level()# w,   h
-        self.player = Player(242, 135)
+        self.player = Player(242, 201)
         self.mouse_pressed = False
         self.levels = [
             "startinglevel",
             "secondlevel",
             "thirdlevel"
         ]
-        self.level.load(self.levels[0])
+        
         
 
+        damping = 0.85
+
+        # Set the gravity. (0, 0) is good for outer space and top-down.
+        gravity = (0, 0)
+
+        # Create the physics engine
+        self.physics_engine = PymunkPhysicsEngine(damping=damping,
+                                                  gravity=gravity)
+        def on_load_wraper(first_type, bruh, bruw, bruv, brue):
+            self.load_level()
+        self.physics_engine.add_collision_handler(
+            first_type = "player",
+            second_type = "tile",
+            post_handler = on_load_wraper
+        )
+        self.level = Level(self.physics_engine)
+
+        self.physics_engine.add_sprite(self.player,
+                                       #friction=0.01,
+                                       moment_of_inertia=PymunkPhysicsEngine.MOMENT_INF,
+                                       damping=damping,
+                                       collision_type="player",
+                                       max_velocity=400)
+
+        self.load_level()
+    def load_level(self):
+        level_name = self.levels[self.current_level]
+
+        # sets players location
+        if level_name == "startinglevel":
+            #self.player.center_x = 242
+            #self.player.center_y = 201
+            self.physics_engine.set_position(self.player, position=[242, 201])
+
+        elif level_name == "secondlevel":
+            #self.player.center_x = 181.5
+            #self.player.center_y = 217.5
+            self.physics_engine.set_position(self.player, position=[181.5, 217.5])
+        elif level_name == "thirdlevel":
+            #self.player.center_x = 242
+            #self.player.center_y = 162.5
+            # load the level
+            self.physics_engine.set_position(self.player, position=[242, 162.5])
+        self.level.load(self.levels[self.current_level])
+
+        self.physics_engine.add_sprite_list(self.level.tiles,
+                                            #friction=0,
+                                            collision_type="tile",
+                                            body_type=PymunkPhysicsEngine.STATIC)
+        self.physics_engine.add_sprite_list(self.level.end_tiles,
+                                            #friction=0,
+                                            collision_type="end_tile",
+                                            body_type=PymunkPhysicsEngine.STATIC)
     def on_draw(self):
-        arcade.draw_rectangle_filled(242, 135, 100, 100, arcade.csscolor.YELLOW)
         self.clear()
         self.player.draw()
         self.level.draw()
     def on_update(self, delta_time):
+        self.turret.on_update(delta_time)
+        
         if self.W_KEY == Key_Pressed:
-            self.player.center_y += PLAYER_VELOCITY
+            #self.player.center_y += PLAYER_FORCE
+            self.physics_engine.apply_force(self.player, force=[0, PLAYER_FORCE])
         if self.S_KEY == Key_Pressed:
-            self.player.center_y -= PLAYER_VELOCITY
+            self.physics_engine.apply_force(self.player, force=[0, -PLAYER_FORCE])
+            #self.player.center_y -= PLAYER_FORCE
         if self.A_KEY == Key_Pressed:
-            self.player.center_x -= PLAYER_VELOCITY
+            self.physics_engine.apply_force(self.player, force=[-PLAYER_FORCE, 0])
+            #self.player.center_x -= PLAYER_FORCE
         if self.D_KEY == Key_Pressed:
-            self.player.center_x += PLAYER_VELOCITY
+            self.physics_engine.apply_force(self.player, force=[PLAYER_FORCE, 0])
+            #self.player.center_x += PLAYER_FORCE
         if arcade.check_for_collision_with_list(self.player, self.level.end_tiles):
-            self.level_counter += 1
-            self.level.load(self.levels[self.level_counter])
+            self.current_level += 1
+            self.load_level()
+        self.physics_engine.step()
+        
+
+        if self.level.tiles[0].center_x > 50:
+            print(f"\nx: {self.level.tiles[0].center_x}\ny: {self.level.tiles[0].center_y}")
 
 #colliding = arcade.check_for_collision(self.player, self.tile)
 
@@ -84,7 +150,9 @@ class GameWindow(arcade.Window):
 
        
     def on_key_press(self, key, modifiers):
-        
+        if key == arcade.key.P:
+            self.load_level()
+            print("Level Reset")
         if key == arcade.key.O:
             success = self.level.save()
 
@@ -104,24 +172,28 @@ class GameWindow(arcade.Window):
 
         elif key == arcade.key.W:
             self.W_KEY = Key_Pressed
+            print(f"X: {self.player.center_x}\nY: {self.player.center_y}")
         elif key == arcade.key.S:
             self.S_KEY = Key_Pressed
+            print(f"X: {self.player.center_x}\nY: {self.player.center_y}")
             # move down
         elif key == arcade.key.A:
             self.A_KEY = Key_Pressed
+            print(f"X: {self.player.center_x}\nY: {self.player.center_y}")
         elif key == arcade.key.D:
             self.D_KEY = Key_Pressed
+            print(f"X: {self.player.center_x}\nY: {self.player.center_y}")
 
 
         # elif key == arcade.key.UP:
-        #     self.player.center_y += PLAYER_VELOCITY
+        #     self.player.center_y += PLAYER_FORCE
         # elif key == arcade.key.DOWN:
-        #     self.player.center_y -= PLAYER_VELOCITY
+        #     self.player.center_y -= PLAYER_FORCE
         #     # move down
         # elif key == arcade.key.LEFT:
-        #     self.player.center_x -= PLAYER_VELOCITY
+        #     self.player.center_x -= PLAYER_FORCE
         # elif key == arcade.key.RIGHT:
-        #     self.player.center_x += PLAYER_VELOCITY
+        #     self.player.center_x += PLAYER_FORCE
 
 
     # LOOK IN PLAYER - this is in there and I am not sure if it should be here or in player so confirm that

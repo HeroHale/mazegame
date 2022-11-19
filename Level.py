@@ -30,9 +30,11 @@ def level_decoder(dct):
         #this will only happen if dct is None
         return None
 class Level():
-    def __init__(self):
+    def __init__(self, physics : arcade.PymunkPhysicsEngine):
+        self.tiles = arcade.SpriteList()
+        self.end_tiles = arcade.SpriteList()
+        self.physics = physics
         self.clear()
-
     def save(self):
         #try:
         with open("level.json", "w") as f:
@@ -67,8 +69,16 @@ class Level():
         self.sync_tiles()
 
     def sync_tiles(self):
-        self.tiles = arcade.SpriteList()
-        self.end_tiles = arcade.SpriteList()
+        current_tile = 0
+        current_end_tile = 0
+        for tile in self.tiles:
+            self.physics.remove_sprite(self.tiles[current_tile])
+            current_tile += 1
+        for end_tile in self.end_tiles:
+            self.physics.remove_sprite(self.end_tiles[current_end_tile])
+            current_end_tile += 1
+        self.tiles.clear()
+        self.end_tiles.clear()
         for row_index, row in enumerate(self.contents):
             for col_index, tile in enumerate(row):
                 if tile is None:
@@ -76,8 +86,7 @@ class Level():
                 elif isinstance(tile, str):
                     raise Exception("that is not a tile")
                 elif isinstance(tile, End_Tile):
-                    self.end_tiles.append(tile)
-                    print("end tile is being placed") # add the new tile to the arcade list
+                    self.end_tiles.append(tile) # add the new tile to the arcade list
                 elif isinstance(tile, Tile):
                     self.tiles.append(tile) # add the new tile to the arcade list
                 else:
@@ -104,3 +113,4 @@ class Level():
 
     def draw(self):
         self.tiles.draw()
+        self.end_tiles.draw()

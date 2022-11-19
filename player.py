@@ -17,18 +17,20 @@ class Player(arcade.Sprite):
         forcey = 0
         if keys[arcade.key.W]:
             forcex += 0
-            forcey += PLAYER_MOVE_FORCE * dtime 
+            forcey += PLAYER_MOVE_FORCE * dtime
+             
         if keys[arcade.key.S]:
             forcex += 0
             forcey += -PLAYER_MOVE_FORCE * dtime
-
+             
         if keys[arcade.key.D]:
             forcex = PLAYER_MOVE_FORCE * dtime
             forcey = 0
+            
         if keys[arcade.key.A]:
             forcex = -PLAYER_MOVE_FORCE * dtime
             forcey = 0
-
+             
         return (forcex, forcey)
 
 
