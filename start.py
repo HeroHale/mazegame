@@ -10,21 +10,25 @@ from pymunk import CollisionHandler
 from Tile import End_Tile, Tile
 from Level import Level
 from player import Player
-from turret import Turret
+from turret import Turret, Bullet
 from constants import WIDTH, HEIGHT, TILESIZE, PLAYER_FORCE, Key_Pressed, Key_Released
 
 class GameWindow(arcade.Window):
     def __init__(self):
         super().__init__(WIDTH, HEIGHT, "Maze Game")
         #create empty level
-
-        self.turret = Turret()
+        self.player = Player(242, 201)
+        self.bullet = arcade.SpriteList()
+        damping = 0.85
+        gravity = (0, 0)
+        self.physics_engine = PymunkPhysicsEngine(damping=damping,
+                                                  gravity=gravity)
+        self.turret = Turret(self.player, self.bullet, self.physics_engine)
         self.current_level = 0
         self.W_KEY = Key_Released
         self.S_KEY = Key_Released
         self.A_KEY = Key_Released
         self.D_KEY = Key_Released
-        self.player = Player(242, 201)
         self.mouse_pressed = False
         self.levels = [
             "startinglevel",
@@ -32,22 +36,29 @@ class GameWindow(arcade.Window):
             "thirdlevel"
         ]
         
+
+         #Set the gravity. (0, 0) is good for outer space and top-down.
         
 
-        damping = 0.85
-
-        # Set the gravity. (0, 0) is good for outer space and top-down.
-        gravity = (0, 0)
-
         # Create the physics engine
-        self.physics_engine = PymunkPhysicsEngine(damping=damping,
-                                                  gravity=gravity)
+        
         def on_load_wraper(first_type, bruh, bruw, bruv, brue):
             self.load_level()
         self.physics_engine.add_collision_handler(
             first_type = "player",
             second_type = "tile",
             post_handler = on_load_wraper
+        )
+        self.physics_engine.add_collision_handler(
+            first_type = "player",
+            second_type = "bullet",
+            post_handler = on_load_wraper
+        )
+        self.physics_engine.add_collision_handler(
+            first_type = "bullet",
+            second_type = "tile",
+            post_handler = Bullet.bullet_hits_wall
+            
         )
         self.level = Level(self.physics_engine)
 
@@ -57,6 +68,7 @@ class GameWindow(arcade.Window):
                                        damping=damping,
                                        collision_type="player",
                                        max_velocity=400)
+
 
         self.load_level()
     def load_level(self):
@@ -91,6 +103,8 @@ class GameWindow(arcade.Window):
         self.clear()
         self.player.draw()
         self.level.draw()
+        self.turret.draw()
+        self.bullet.draw()
     def on_update(self, delta_time):
         self.turret.on_update(delta_time)
         
