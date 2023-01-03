@@ -52,7 +52,8 @@ class GameWindow(arcade.Window):
         self.physics_engine.add_collision_handler(
             first_type = "player",
             second_type = "bullet",
-            post_handler = on_load_wraper
+            post_handler = Bullet.bullet_hits_player
+
         )
         self.physics_engine.add_collision_handler(
             first_type = "bullet",

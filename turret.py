@@ -5,27 +5,40 @@ from player import Player
 from constants import TILESIZE
 
 class Bullet(arcade.Sprite):
-    cooldown_time = 5
-    def __init__(self, center_x, center_y, physics_engine):
+    def __init__(self, angle: float, center_x: int, center_y: int, physics_engine: arcade.PymunkPhysicsEngine):
         super().__init__("Textures/bullet.png", scale=(TILESIZE/32))
         
         self.center_x = center_x  
-        self.center_y = center_y 
+        self.center_y = center_y
+        self.angle = angle
+        self.physics_engine = physics_engine
 
         physics_engine.add_sprite(self, 
                                         #friction=0.01,
                                         moment_of_inertia=arcade.PymunkPhysicsEngine.MOMENT_INF,
-                                        damping=0.85,
+                                        damping=1,
                                         collision_type="bullet",
                                         max_velocity=400)
-    
+        velocity = [0.0, 0.0]
+        velocity[1] = math.sin(math.radians(self.angle))*-500
+        velocity[0] = math.cos(math.radians(self.angle))*-500
+
+        physics_engine.set_velocity(sprite=self, velocity=velocity)
     @classmethod
     def bullet_hits_wall(cls, bullet, _tile, _arbiter, _space, _data):
-        bullet.remove_from_sprite_lists()
+        bullet.kill()
         print("bullet hit the wall")
 
+    @classmethod
+    def bullet_hits_player(cls, bullet, _tile, _arbiter, _space, _data):
+        bullet.kill()
+        print("Bullet Hit Player")
+
+    def kill(self):
+        self.physics_engine.remove_sprite(self)
+        self.remove_from_sprite_lists()
 class Turret(arcade.Sprite):
-    cooldown_time = 5
+    cooldown_time = 120
     def __init__(self, player, bullet_list, physics_engine):
         super().__init__("Textures/gun.png", scale=(TILESIZE/275))
         self.physics_engine = physics_engine
@@ -37,7 +50,7 @@ class Turret(arcade.Sprite):
         self.cooldown = 0
 
     def shoot_at_player(self):
-        bullet = Bullet(self.center_x,self.center_y, self.physics_engine)
+        bullet = Bullet(self.angle, self.center_x,self.center_y, self.physics_engine)
         self.bullet_list.append(bullet)
 
     def on_update(self, delta_time):
@@ -86,9 +99,9 @@ class Turret(arcade.Sprite):
         
             
 
-        def fire():
-            turret = 10
-            turret.fire_at(self.player)
+        # def fire():
+        #     turret = 10
+        #     turret.fire_at(self.player)
 
 
         #get_player_position
