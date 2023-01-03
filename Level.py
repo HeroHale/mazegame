@@ -2,12 +2,15 @@ import json
 import arcade
 from Tile import Tile, End_Tile
 from constants import TILESIZE, HEIGHT, WIDTH
+from turret import Turret
 
 
 class LevelEncoder(json.JSONEncoder):
 
     def default(self, object):
         if isinstance(object, Tile):
+            return object.encode()
+        elif isinstance(object, Turret):
             return object.encode()
         return json.JSONEncoder.default(self, object)
 
@@ -33,6 +36,7 @@ class Level():
     def __init__(self, physics : arcade.PymunkPhysicsEngine):
         self.tiles = arcade.SpriteList()
         self.end_tiles = arcade.SpriteList()
+        self.turrets = arcade.SpriteList()
         self.physics = physics
         self.clear()
     def save(self):
@@ -107,6 +111,18 @@ class Level():
             if tile_class == End_Tile:
                 self.end_tiles.append(new_tile)
 
+        except IndexError:
+            return
+
+    def place_turret(self, coord_x, coord_y, player, bullet_list, physics_engine):
+        
+        try:
+            # if self.contents[coord_x][coord_y] is not None:
+            #     return
+
+            new_turret = Turret(coord_x*TILESIZE, coord_y*TILESIZE, player, bullet_list, physics_engine)
+            self.contents[coord_x][coord_y] = new_turret
+            self.turrets.append(new_turret)
         except IndexError:
             return
 

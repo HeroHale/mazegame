@@ -23,7 +23,8 @@ class GameWindow(arcade.Window):
         gravity = (0, 0)
         self.physics_engine = PymunkPhysicsEngine(damping=damping,
                                                   gravity=gravity)
-        self.turret = Turret(self.player, self.bullet, self.physics_engine)
+                        
+    
         self.current_level = 0
         self.W_KEY = Key_Released
         self.S_KEY = Key_Released
@@ -50,8 +51,8 @@ class GameWindow(arcade.Window):
             post_handler = on_load_wraper
         )
         self.physics_engine.add_collision_handler(
-            first_type = "player",
-            second_type = "bullet",
+            first_type = "bullet",
+            second_type = "player",
             post_handler = Bullet.bullet_hits_player
 
         )
@@ -62,7 +63,12 @@ class GameWindow(arcade.Window):
             
         )
         self.level = Level(self.physics_engine)
-
+        
+        
+        turret = Turret(350, 510, self.player, self.bullet, self.physics_engine)
+        self.level.turrets.append(turret)
+        
+        
         self.physics_engine.add_sprite(self.player,
                                        #friction=0.01,
                                        moment_of_inertia=PymunkPhysicsEngine.MOMENT_INF,
@@ -104,10 +110,11 @@ class GameWindow(arcade.Window):
         self.clear()
         self.player.draw()
         self.level.draw()
-        self.turret.draw()
+        self.level.turrets.draw()
         self.bullet.draw()
     def on_update(self, delta_time):
-        self.turret.on_update(delta_time)
+        for turret in self.level.turrets:
+            turret.on_update(delta_time)
         
         if self.W_KEY == Key_Pressed:
             #self.player.center_y += PLAYER_FORCE
@@ -142,10 +149,14 @@ class GameWindow(arcade.Window):
             coord_x = int(mouse_x/TILESIZE)
             coord_y = int(mouse_y/TILESIZE)
             self.level.place_tile(coord_x, coord_y)
-        if button == arcade.MOUSE_BUTTON_RIGHT:
+        elif button == arcade.MOUSE_BUTTON_RIGHT:
             coord_x = int(mouse_x/TILESIZE)
             coord_y = int(mouse_y/TILESIZE)
             self.level.place_tile(coord_x, coord_y, End_Tile)
+        elif button == arcade.MOUSE_BUTTON_MIDDLE:
+            coord_x = int(mouse_x/TILESIZE)
+            coord_y = int(mouse_y/TILESIZE)
+            self.level.place_turret(coord_x, coord_y, self.player, self.bullet, self.physics_engine)
     def on_mouse_motion(self, mouse_x, mouse_y, dx, dy):
         if self.mouse_pressed:
             coord_x = int(mouse_x/TILESIZE)
@@ -178,7 +189,8 @@ class GameWindow(arcade.Window):
             self.level.clear()
             print("Cleared file.")
         elif key == arcade.key.L:
-            success = self.level.load()
+            #reloads the level
+            success = self.load_level()
 
             if success:
                 print("Loaded level from file.")
