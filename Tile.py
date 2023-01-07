@@ -18,3 +18,38 @@ class End_Tile(Tile):
 
     def encode(self):
         return ("end_tile")
+
+# class MovingTile(Tile):
+#     def on_update(self, delta_time):
+#         super().on_update(delta_time)
+
+#         moving_up = True
+#         moving_right = True
+
+#     if y > number
+#         moving_up = True
+#     else y < number
+#         moving_up = False
+
+
+
+
+# function init() {
+#   create_variable moving_up = true
+# }
+
+# function on_update() {
+#   # SECTION 1---------------------------------------------------------------------
+#   if (platform.y - (platform.height/2) < 0) and (!moving_up) {
+#     moving_up = true
+#   } else if (platform.y + (platform.height/2) > SCREEN_HEIGHT) and (moving_up) {
+#     moving_up = false
+#   }
+  
+#   # SECTION 2---------------------------------------------------------------------
+#   if moving_up {
+#     physics_engine.apply_impulse([0, 1])
+#   } else {
+#     physics_engine.apply_impulse([0, -1])
+#   }
+# }

@@ -34,7 +34,8 @@ class GameWindow(arcade.Window):
         self.levels = [
             "startinglevel",
             "secondlevel",
-            "thirdlevel"
+            "thirdlevel",
+            "fourthlevel"
         ]
         
 
@@ -45,11 +46,12 @@ class GameWindow(arcade.Window):
         
         def on_load_wraper(first_type, bruh, bruw, bruv, brue):
             self.load_level()
-        self.physics_engine.add_collision_handler(
-            first_type = "player",
-            second_type = "tile",
-            post_handler = on_load_wraper
-        )
+            ## CHANGE THIS FOR LEVEL TESTING
+        # self.physics_engine.add_collision_handler(
+        #     first_type = "player",
+        #     second_type = "tile",
+        #     post_handler = on_load_wraper
+        #)
         self.physics_engine.add_collision_handler(
             first_type = "bullet",
             second_type = "player",
@@ -60,6 +62,7 @@ class GameWindow(arcade.Window):
             first_type = "bullet",
             second_type = "tile",
             post_handler = Bullet.bullet_hits_wall
+            
             
         )
         self.level = Level(self.physics_engine)
@@ -96,6 +99,11 @@ class GameWindow(arcade.Window):
             #self.player.center_y = 162.5
             # load the level
             self.physics_engine.set_position(self.player, position=[242, 162.5])
+        elif level_name == "fourthlevel":
+            #self.player.center_x = 242
+            #self.player.center_y = 162.5
+            # load the level
+            self.physics_engine.set_position(self.player, position=[1709.2, 152.6])
         self.level.load(self.levels[self.current_level])
 
         self.physics_engine.add_sprite_list(self.level.tiles,
@@ -133,9 +141,6 @@ class GameWindow(arcade.Window):
             self.load_level()
         self.physics_engine.step()
         
-
-        if self.level.tiles[0].center_x > 50:
-            print(f"\nx: {self.level.tiles[0].center_x}\ny: {self.level.tiles[0].center_y}")
 
 #colliding = arcade.check_for_collision(self.player, self.tile)
 
