@@ -5,6 +5,7 @@ class Tile(arcade.Sprite):
     def __init__(self, x, y, texture="Textures/square.png"):
         super().__init__(texture, scale=(TILESIZE/16))
         self.set_cords(x, y)
+        self.bouncy = False
 
     def encode(self):
         return ("tile")
@@ -12,6 +13,21 @@ class Tile(arcade.Sprite):
     def set_cords(self, x, y):
         self.center_x = (x * TILESIZE) + (TILESIZE/2)
         self.center_y = (y * TILESIZE) + (TILESIZE/2)
+
+    @classmethod
+    def encode_tile_or_none(cls, object):
+        encoded = "None"
+        bouncy = False
+
+        if isinstance(object, cls):
+            encoded = object.encode()
+            bouncy = False
+            
+            return {
+                "tile" : encoded,
+                "bouncy": bouncy
+            }
+
 class End_Tile(Tile):
     def __init__(self, x, y):
         super().__init__(x, y, texture="Textures/end_square.png")

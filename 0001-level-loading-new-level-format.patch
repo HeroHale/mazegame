@@ -1,0 +1,127 @@
+From db17049ec1b35731c2f7692ed84359e4eae5abe5 Mon Sep 17 00:00:00 2001
+From: Ian Mcfarlane <i.mcfarlane2002@gmail.com>
+Date: Sat, 7 Jan 2023 22:06:21 -0800
+Subject: [PATCH] level loading, new level format
+
+---
+ Level.py   | 26 ++++++++++++++++++++------
+ Tile.py    | 15 +++++++++++++++
+ level.json |  1 -
+ start.py   | 10 ++++------
+ 4 files changed, 39 insertions(+), 13 deletions(-)
+ delete mode 100644 level.json
+
+diff --git a/Level.py b/Level.py
+index 21498a5..147bde1 100644
+--- a/Level.py
++++ b/Level.py
+@@ -8,18 +8,32 @@ from turret import Turret
+ class LevelEncoder(json.JSONEncoder):
+ 
+     def default(self, object):
+-        if isinstance(object, Tile):
+-            return object.encode()
++        if isinstance(object, Tile) or object is None:
++            return Tile.encode_tile_or_none(object)
+         elif isinstance(object, Turret):
+             return object.encode()
+         return json.JSONEncoder.default(self, object)
+ 
+ def level_decoder(dct):
+     #base case
+-    if dct == "tile":
+-        return Tile(0, 0)
+-    if dct == "end_tile":
+-        return End_Tile(0, 0)
++    if isinstance(dct, dict):
++        if "tile" in dct:
++            # this is a tile, return that
++            decoded_tile = None
++            if dct["tile"] == "end_tile":
++                decoded_tile = End_Tile(0, 0)
++            elif dct["tile"] == "None":
++                return None
++            else:
++                decoded_tile = Tile(0, 0)
++            
++            decoded_tile.bouncy = dct["bouncy"]
++            return decoded_tile
++        # decode all the items in this dictionary (if its not a tile)
++        decoded_dict = {}
++        for key, value in dct.items():
++            decoded_dict[key] = level_decoder(value)
++        return decoded_dict
+     elif isinstance(dct, list):
+         #recursive case
+         #collect any items in list that might be the base case 
+diff --git a/Tile.py b/Tile.py
+index f5aeaf9..4793080 100644
+--- a/Tile.py
++++ b/Tile.py
+@@ -5,9 +5,24 @@ class Tile(arcade.Sprite):
+     def __init__(self, x, y, texture="Textures/square.png"):
+         super().__init__(texture, scale=(TILESIZE/16))
+         self.set_cords(x, y)
++        self.bouncy = False
+ 
+     def encode(self):
+         return ("tile")
++    
++    @classmethod
++    def encode_tile_or_none(cls, object):
++        encoded = "None"
++        bouncy = False
++
++        if isinstance(object, cls):
++            encoded = object.encode()
++            bouncy = object.bouncy
++        
++        return {
++            "tile": encoded,
++            "bouncy": bouncy
++        }
+ 
+     def set_cords(self, x, y):
+         self.center_x = (x * TILESIZE) + (TILESIZE/2)
+diff --git a/level.json b/level.json
+deleted file mode 100644
+index a02c8fc..0000000
+--- a/level.json
++++ /dev/null
+@@ -1 +0,0 @@
+-[["tile", "tile", "tile", "tile", "tile", "tile", "tile", "tile", "tile"], ["tile", null, null, null, null, null, null, null, "tile"], ["tile", null, null, null, null, null, null, null, "tile"], ["tile", null, null, null, null, null, null, null, "tile"], ["tile", "tile", "tile", "tile", "tile", "tile", null, null, "tile"], ["tile", "tile", "tile", "tile", "tile", "tile", null, null, "tile"], ["tile", null, null, null, null, null, null, null, "tile"], ["tile", null, null, null, null, null, null, null, "tile"], ["tile", null, "tile", "tile", "tile", "tile", "tile", "tile", "tile"], ["tile", null, "tile", "tile", "tile", "tile", "tile", "tile", "tile"], ["tile", null, null, null, null, null, null, null, "tile"], ["tile", null, null, null, null, null, null, null, "tile"], ["tile", "tile", "tile", "tile", "tile", "tile", null, null, "tile"], ["tile", "tile", "tile", "tile", "tile", "tile", null, null, "tile"], ["tile", null, null, null, null, null, null, null, "tile"], ["tile", "end_tile", null, null, null, null, null, null, "tile"], ["tile", "end_tile", null, null, null, null, null, null, "tile"], ["tile", null, null, null, null, null, null, null, "tile"], ["tile", "tile", "tile", "tile", "tile", "tile", "tile", "tile", "tile"]]
+\ No newline at end of file
+diff --git a/start.py b/start.py
+index 4f41730..7346dac 100644
+--- a/start.py
++++ b/start.py
+@@ -128,14 +128,12 @@ class GameWindow(arcade.Window):
+         if self.D_KEY == Key_Pressed:
+             self.physics_engine.apply_force(self.player, force=[PLAYER_FORCE, 0])
+             #self.player.center_x += PLAYER_FORCE
+-        if arcade.check_for_collision_with_list(self.player, self.level.end_tiles):
+-            self.current_level += 1
+-            self.load_level()
++        # if arcade.check_for_collision_with_list(self.player, self.level.end_tiles):
++        #     self.current_level += 1
++        #     self.load_level()
+         self.physics_engine.step()
+         
+ 
+-        if self.level.tiles[0].center_x > 50:
+-            print(f"\nx: {self.level.tiles[0].center_x}\ny: {self.level.tiles[0].center_y}")
+ 
+ #colliding = arcade.check_for_collision(self.player, self.tile)
+ 
+@@ -177,7 +175,7 @@ class GameWindow(arcade.Window):
+        
+     def on_key_press(self, key, modifiers):
+         if key == arcade.key.P:
+-            self.load_level()
++            self.level.load(None)
+             print("Level Reset")
+         if key == arcade.key.O:
+             success = self.level.save()
+-- 
+2.37.3.windows.1
+

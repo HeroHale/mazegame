@@ -8,18 +8,32 @@ from turret import Turret
 class LevelEncoder(json.JSONEncoder):
 
     def default(self, object):
-        if isinstance(object, Tile):
-            return object.encode()
+        if isinstance(object, Tile) or (object == "None"):
+            return Tile.encode_tile_or_none(object)
         elif isinstance(object, Turret):
             return object.encode()
-        return json.JSONEncoder.default(self, object)
+        return super().default(self, object)
 
 def level_decoder(dct):
     #base case
-    if dct == "tile":
-        return Tile(0, 0)
-    if dct == "end_tile":
-        return End_Tile(0, 0)
+    if isinstance(dct, dict):
+        if "tile" in dct:
+            # this is a tile, return that
+            decoded_tile = None
+            if dct["tile"] == "end_tile":
+                decoded_tile = End_Tile(0, 0)
+            elif dct["tile"] == "None":
+                return None
+            else:
+                decoded_tile = Tile(0, 0)
+            
+            decoded_tile.bouncy = dct["bouncy"]
+            return decoded_tile
+        # decode all the items in this dictionary (if its not a tile)
+        decoded_dict = {}
+        for key, value in dct.items():
+            decoded_dict[key] = level_decoder(value)
+        return decoded_dict
     elif isinstance(dct, list):
         #recursive case
         #collect any items in list that might be the base case 
@@ -41,8 +55,24 @@ class Level():
         self.clear()
     def save(self):
         #try:
+        
+        for row_number, row in enumerate(self.contents):
+            for colum_number, tile in enumerate(row):
+                if tile is None:
+                    self.contents[row_number][colum_number] = {
+                "tile" : "None",
+                "bouncy": False
+            }
+
+
         with open("level.json", "w") as f:
             json.dump(self.contents, f, cls=LevelEncoder)
+
+            for row_number, row in enumerate(self.contents):
+                for colum_number, tile in enumerate(row):
+                    if isinstance(tile, dict):
+                        if tile["tile"] == "None":
+                            self.contents[row_number][colum_number] = None
         return True
         #except:
             #return False
