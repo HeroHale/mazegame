@@ -32,10 +32,10 @@ class GameWindow(arcade.Window):
         self.D_KEY = Key_Released
         self.mouse_pressed = False
         self.levels = [
+            "fourthlevel",
             "startinglevel",
             "secondlevel",
-            "thirdlevel",
-            "fourthlevel"
+            "thirdlevel"
         ]
         
 
