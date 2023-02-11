@@ -7,10 +7,11 @@ from arcade import PymunkPhysicsEngine
 import json
 
 from pymunk import CollisionHandler
-from Tile import End_Tile, Tile
+from Tiles.tile import End_Tile, Tile
 from Level import Level
 from player import Player
-from turret import Turret, Bullet
+from Tiles.turret import Turret, Bullet
+from Tiles.bouncing_tile import BouncingTile
 from constants import WIDTH, HEIGHT, TILESIZE, PLAYER_FORCE, Key_Pressed, Key_Released
 
 class GameWindow(arcade.Window):
@@ -31,14 +32,13 @@ class GameWindow(arcade.Window):
         self.A_KEY = Key_Released
         self.D_KEY = Key_Released
         self.mouse_pressed = False
+        self.bouncing_tile_key_pressed = Key_Released
         self.levels = [
             "fourthlevel",
             "startinglevel",
             "secondlevel",
             "thirdlevel"
         ]
-        
-
          #Set the gravity. (0, 0) is good for outer space and top-down.
         
 
@@ -154,6 +154,8 @@ class GameWindow(arcade.Window):
             coord_x = int(mouse_x/TILESIZE)
             coord_y = int(mouse_y/TILESIZE)
             self.level.place_tile(coord_x, coord_y)
+            if self.bouncing_tile_key_pressed:
+                bouncing_tile = BouncingTile(mouse_x, mouse_y, [1, 1], self.physics_engine)
         elif button == arcade.MOUSE_BUTTON_RIGHT:
             coord_x = int(mouse_x/TILESIZE)
             coord_y = int(mouse_y/TILESIZE)
@@ -162,6 +164,9 @@ class GameWindow(arcade.Window):
             coord_x = int(mouse_x/TILESIZE)
             coord_y = int(mouse_y/TILESIZE)
             self.level.place_turret(coord_x, coord_y, self.player, self.bullet, self.physics_engine)
+            #print(tile.bouncy)
+        #if self.bouncing_tile = BouncingTile()
+
     def on_mouse_motion(self, mouse_x, mouse_y, dx, dy):
         if self.mouse_pressed:
             coord_x = int(mouse_x/TILESIZE)
@@ -177,6 +182,9 @@ class GameWindow(arcade.Window):
              self.A_KEY = Key_Released
          elif key == arcade.key.D:
              self.D_KEY = Key_Released
+         elif key == arcade.key.N:
+             self.bouncing_tile_key_pressed = Key_Released
+             
             
 
        
@@ -200,7 +208,10 @@ class GameWindow(arcade.Window):
             if success:
                 print("Loaded level from file.")
             else:
-                print("Error loading level")            
+                print("Error loading level")
+
+        elif key == arcade.key.N:
+            self.bouncing_tile_key_pressed = Key_Pressed            
 
         elif key == arcade.key.W:
             self.W_KEY = Key_Pressed

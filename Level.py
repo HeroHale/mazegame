@@ -1,8 +1,8 @@
 import json
 import arcade
-from Tile import Tile, End_Tile
+from Tiles.tile import Tile, End_Tile
 from constants import TILESIZE, HEIGHT, WIDTH
-from turret import Turret
+from Tiles.turret import Turret
 
 
 class LevelEncoder(json.JSONEncoder):
