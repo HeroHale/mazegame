@@ -20,6 +20,7 @@ class GameWindow(arcade.Window):
         #create empty level
         self.player = Player(242, 201)
         self.bullet = arcade.SpriteList()
+        self.moving_tiles = arcade.SpriteList()
         damping = 0.85
         gravity = (0, 0)
         self.physics_engine = PymunkPhysicsEngine(damping=damping,
@@ -62,6 +63,13 @@ class GameWindow(arcade.Window):
             first_type = "bullet",
             second_type = "tile",
             post_handler = Bullet.bullet_hits_wall
+            
+            
+        )
+        self.physics_engine.add_collision_handler(
+            first_type = "tile",
+            second_type = "moving_tile",
+            begin_handler = BouncingTile.moving_tile_hits_tile
             
             
         )
@@ -120,10 +128,12 @@ class GameWindow(arcade.Window):
         self.level.draw()
         self.level.turrets.draw()
         self.bullet.draw()
+        self.moving_tiles.draw()
     def on_update(self, delta_time):
         for turret in self.level.turrets:
             turret.on_update(delta_time)
-        
+        for bouncing_tile in self.moving_tiles:
+            bouncing_tile.on_update(delta_time)
         if self.W_KEY == Key_Pressed:
             #self.player.center_y += PLAYER_FORCE
             self.physics_engine.apply_force(self.player, force=[0, PLAYER_FORCE])
@@ -149,20 +159,19 @@ class GameWindow(arcade.Window):
             self.mouse_pressed = False
 
     def on_mouse_press(self, mouse_x, mouse_y, button, modifiers):
+        coord_x = int(mouse_x/TILESIZE)
+        coord_y = int(mouse_y/TILESIZE)
         if button == arcade.MOUSE_BUTTON_LEFT:
-            self.mouse_pressed = True
-            coord_x = int(mouse_x/TILESIZE)
-            coord_y = int(mouse_y/TILESIZE)
-            self.level.place_tile(coord_x, coord_y)
             if self.bouncing_tile_key_pressed:
-                bouncing_tile = BouncingTile(mouse_x, mouse_y, [1, 1], self.physics_engine)
+                bouncing_tile = BouncingTile(coord_x, coord_y, [1, 1], self.physics_engine)
+                self.moving_tiles.append(bouncing_tile)
+                print("bouncing tile placed")
+            else:    
+                self.mouse_pressed = True
+                self.level.place_tile(coord_x, coord_y)
         elif button == arcade.MOUSE_BUTTON_RIGHT:
-            coord_x = int(mouse_x/TILESIZE)
-            coord_y = int(mouse_y/TILESIZE)
             self.level.place_tile(coord_x, coord_y, End_Tile)
         elif button == arcade.MOUSE_BUTTON_MIDDLE:
-            coord_x = int(mouse_x/TILESIZE)
-            coord_y = int(mouse_y/TILESIZE)
             self.level.place_turret(coord_x, coord_y, self.player, self.bullet, self.physics_engine)
             #print(tile.bouncy)
         #if self.bouncing_tile = BouncingTile()
