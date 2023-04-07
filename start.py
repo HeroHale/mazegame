@@ -34,6 +34,7 @@ class GameWindow(arcade.Window):
         self.D_KEY = Key_Released
         self.mouse_pressed = False
         self.bouncing_tile_key_pressed = Key_Released
+        self.make_bouncy_key_pressed = Key_Released
         self.levels = [
             "fourthlevel",
             "startinglevel",
@@ -114,14 +115,6 @@ class GameWindow(arcade.Window):
             self.physics_engine.set_position(self.player, position=[1709.2, 152.6])
         self.level.load(self.levels[self.current_level])
 
-        self.physics_engine.add_sprite_list(self.level.tiles,
-                                            #friction=0,
-                                            collision_type="tile",
-                                            body_type=PymunkPhysicsEngine.STATIC)
-        self.physics_engine.add_sprite_list(self.level.end_tiles,
-                                            #friction=0,
-                                            collision_type="end_tile",
-                                            body_type=PymunkPhysicsEngine.STATIC)
     def on_draw(self):
         self.clear()
         self.player.draw()
@@ -163,9 +156,16 @@ class GameWindow(arcade.Window):
         coord_y = int(mouse_y/TILESIZE)
         if button == arcade.MOUSE_BUTTON_LEFT:
             if self.bouncing_tile_key_pressed:
-                bouncing_tile = BouncingTile(coord_x, coord_y, [1, 1], self.physics_engine)
+                bouncing_tile = BouncingTile(coord_x, coord_y, [0, 10], self.physics_engine)
                 self.moving_tiles.append(bouncing_tile)
                 print("bouncing tile placed")
+            elif self.make_bouncy_key_pressed:
+                target_tile = self.level.contents[coord_x][coord_y]
+                if target_tile is None:
+                    target_tile = self.level.place_tile(coord_x, coord_y, Tile)
+                    # TODO: make getter and setter for the "bouncy" field
+                target_tile.bouncy = True
+                target_tile.texture = arcade.texture.load_texture("Textures/bouncy_tile.png")
             else:    
                 self.mouse_pressed = True
                 self.level.place_tile(coord_x, coord_y)
@@ -182,18 +182,19 @@ class GameWindow(arcade.Window):
             coord_y = int(mouse_y/TILESIZE)
             self.level.place_tile(coord_x, coord_y)
     def on_key_release(self, key: int, modifiers: int):
-         if key == arcade.key.W:
+        if key == arcade.key.W:
              self.W_KEY = Key_Released
-         elif key == arcade.key.S:
-             self.S_KEY = Key_Released
+        elif key == arcade.key.S:
+            self.S_KEY = Key_Released
              # move down
-         elif key == arcade.key.A:
-             self.A_KEY = Key_Released
-         elif key == arcade.key.D:
-             self.D_KEY = Key_Released
-         elif key == arcade.key.N:
+        elif key == arcade.key.A:
+            self.A_KEY = Key_Released
+        elif key == arcade.key.D:
+            self.D_KEY = Key_Released
+        elif key == arcade.key.N:
+            self.bouncing_tile_key_pressed = Key_Released
+        elif key == arcade.key.B:
              self.bouncing_tile_key_pressed = Key_Released
-             
             
 
        
@@ -201,11 +202,14 @@ class GameWindow(arcade.Window):
         if key == arcade.key.P:
             self.load_level()
             print("Level Reset")
-        if key == arcade.key.O:
+        elif key == arcade.key.O:
             success = self.level.save()
 
             if success:
                 print("Saved level to file.")
+
+        elif key == arcade.key.B:
+            self.make_bouncy_key_pressed = Key_Pressed
 
         elif key == arcade.key.C:
             self.level.clear()

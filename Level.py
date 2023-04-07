@@ -1,5 +1,6 @@
 import json
 import arcade
+from arcade import PymunkPhysicsEngine
 from Tiles.tile import Tile, End_Tile
 from constants import TILESIZE, HEIGHT, WIDTH
 from Tiles.turret import Turret
@@ -87,6 +88,14 @@ class Level():
             self.contents = level_decoder(json.load(f))
             
             self.sync_tiles() # fix tiles that get instantiated at 0,0
+            self.physics.add_sprite_list(self.tiles,
+                                            #friction=0,
+                                            collision_type="tile",
+                                            body_type=PymunkPhysicsEngine.STATIC)
+            self.physics.add_sprite_list(self.end_tiles,
+                                            #friction=0,
+                                            collision_type="end_tile",
+                                            body_type=PymunkPhysicsEngine.STATIC)
         return True
         #except:
             #return False
@@ -101,7 +110,6 @@ class Level():
                 col.append(None)
             self.contents.append(col)
         self.sync_tiles()
-
     def sync_tiles(self):
         current_tile = 0
         current_end_tile = 0
@@ -138,8 +146,19 @@ class Level():
             self.contents[coord_x][coord_y] = new_tile
             self.tiles.append(new_tile)
 
+
             if tile_class == End_Tile:
                 self.end_tiles.append(new_tile)
+                self.physics.add_sprite(new_tile,
+                                            #friction=0,
+                                            collision_type="end_tile",
+                                            body_type=PymunkPhysicsEngine.STATIC)
+            elif tile_class == Tile:
+                self.physics.add_sprite(new_tile,
+                                            #friction=0,
+                                            collision_type="tile",
+                                            body_type=PymunkPhysicsEngine.STATIC)
+            return new_tile
 
         except IndexError:
             return
